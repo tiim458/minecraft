@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeluxeMenus Constructor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#111114;
+  --panel:#1b1b20;
+  --panel-2:#221f26;
+  --panel-3:#26232b;
+  --border:#37333d;
+  --border-light:#4a4551;
+  --slot-bg:#8b8b8b;
+  --slot-light:#ffffff;
+  --slot-dark:#373737;
+  --slot-hover:#a9dc76;
+  --text:#e9e6ee;
+  --text-dim:#9d97a8;
+  --text-faint:#6b6577;
+  --lime:#8fd14f;
+  --lime-dim:#5f9a35;
+  --amber:#e3a83b;
+  --enchant:#a35de8;
+  --danger:#e15c5c;
+  --font-display:'Press Start 2P', monospace;
+  --font-mono:'JetBrains Mono', monospace;
+  --font-body:'Inter', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(143,209,79,0.07), transparent),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(163,93,232,0.06), transparent),
+    var(--void);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--lime-dim);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+
+button{font-family:var(--font-body);cursor:pointer;}
+input,select,textarea{font-family:var(--font-body);}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--lime);outline-offset:2px;
+}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  display:flex;align-items:center;gap:18px;
+  padding:14px 22px;
+  background:linear-gradient(180deg, #1e1c23, #19171d);
+  border-bottom:3px solid #0c0b0e;
+  box-shadow:0 3px 0 rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.03) inset;
+  position:sticky;top:0;z-index:40;
+  flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;margin-right:6px;}
+.brand-icon{
+  width:30px;height:30px;
+  background:
+    linear-gradient(180deg, #a9dc76, #6ea63c);
+  box-shadow:
+    inset 3px 3px 0 rgba(255,255,255,0.35),
+    inset -3px -3px 0 rgba(0,0,0,0.35);
+  image-rendering:pixelated;
+  flex:0 0 auto;
+}
+.brand-text{
+  font-family:var(--font-display);
+  font-size:11px;line-height:1.5;
+  letter-spacing:0.5px;
+  color:var(--lime);
+  text-shadow:2px 2px 0 rgba(0,0,0,0.5);
+}
+.brand-sub{font-size:10px;color:var(--text-faint);font-family:var(--font-mono);letter-spacing:0.5px;}
+
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-faint);font-weight:600;}
+.top-input{
+  background:var(--panel-3);
+  border:1px solid var(--border);
+  border-bottom:2px solid #0e0d10;
+  color:var(--text);
+  padding:7px 10px;
+  border-radius:3px;
+  font-size:13.5px;
+  min-width:200px;
+}
+.top-input:focus{border-color:var(--lime-dim);}
+.rows-stepper{display:flex;align-items:center;gap:6px;}
+.stepper-btn{
+  width:28px;height:30px;background:var(--panel-3);border:1px solid var(--border);border-bottom:2px solid #0e0d10;
+  color:var(--text);border-radius:3px;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+.stepper-btn:hover{background:#2c2933;color:var(--lime);}
+.stepper-btn:active{transform:translateY(1px);}
+.rows-value{width:44px;text-align:center;font-family:var(--font-mono);font-size:14px;font-weight:600;}
+
+.topbar-spacer{flex:1;}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+
+.btn{
+  border-radius:3px;padding:9px 15px;font-size:13px;font-weight:600;
+  border:1px solid var(--border);border-bottom:2px solid rgba(0,0,0,0.45);
+  background:var(--panel-3);color:var(--text);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  transition:transform 0.05s ease;
+}
+.btn:hover{background:#2c2933;}
+.btn:active{transform:translateY(1px);border-bottom-width:1px;}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.btn:disabled:hover{background:var(--panel-3);}
+.btn-icon{width:15px;height:15px;flex:0 0 auto;}
+.btn-ghost{background:transparent;}
+.btn-danger{color:var(--danger);}
+.btn-danger:hover{background:rgba(225,92,92,0.12);border-color:rgba(225,92,92,0.4);}
+.btn-primary{
+  background:linear-gradient(180deg,#a9dc76,#7fbf46);
+  color:#182607;border-color:#6ea63c;border-bottom:2px solid #4f7d29;
+  font-weight:700;
+}
+.btn-primary:hover{background:linear-gradient(180deg,#b7e788,#8bcb51);}
+.btn-primary:disabled{background:var(--panel-3);color:var(--text-faint);border-color:var(--border);}
+
+/* ---------- Layout ---------- */
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr 340px;
+  gap:0;
+  align-items:start;
+  min-height:calc(100vh - 65px);
+}
+@media (max-width:1180px){
+  .layout{grid-template-columns:260px 1fr;}
+  .editor-col{display:none;}
+  .editor-col.mobile-visible{
+    display:block;position:fixed;inset:0;z-index:60;background:rgba(10,9,12,0.7);
+    overflow:auto;padding:24px;
+  }
+}
+
+.side-panel{
+  padding:18px;border-right:1px solid var(--border);
+  position:sticky;top:65px;
+  height:calc(100vh - 65px);
+  display:flex;flex-direction:column;gap:12px;
+}
+.panel-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);font-weight:700;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.search-wrap{position:relative;}
+.search-wrap input{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);border-bottom:2px solid #0e0d10;
+  border-radius:4px;padding:9px 10px 9px 32px;color:var(--text);font-size:13.5px;
+}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-faint);}
+
+.item-list{
+  flex:1;overflow-y:auto;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
+  gap:6px;align-content:start;
+  padding:4px 2px 4px 0;
+}
+.item-list-empty{grid-column:1/-1;color:var(--text-faint);font-size:12.5px;padding:20px 4px;text-align:center;line-height:1.5;}
+
+.lib-slot{
+  aspect-ratio:1;
+  background:var(--slot-bg);
+  border-top:2px solid var(--slot-light);
+  border-left:2px solid var(--slot-light);
+  border-right:2px solid var(--slot-dark);
+  border-bottom:2px solid var(--slot-dark);
+  display:flex;align-items:center;justify-content:center;
+  cursor:grab;position:relative;
+  image-rendering:pixelated;
+}
+.lib-slot:hover{background:#9a9a9a;}
+.lib-slot:active{cursor:grabbing;}
+.lib-slot img{width:76%;height:76%;object-fit:contain;image-rendering:pixelated;pointer-events:none;}
+.lib-slot .fallback{
+  font-family:var(--font-mono);font-weight:700;font-size:15px;color:#2b2b2b;pointer-events:none;
+}
+.lib-name-tip{
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#0d0c10;border:1px solid var(--border-light);color:var(--text);
+  font-size:11px;padding:5px 8px;border-radius:4px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity 0.1s;z-index:20;
+  font-family:var(--font-mono);
+}
+.lib-slot:hover .lib-name-tip{opacity:1;}
+
+.hint-block{
+  font-size:11.5px;color:var(--text-faint);line-height:1.5;
+  background:var(--panel-2);border:1px solid var(--border);border-radius:4px;padding:10px;
+}
+.hint-block b{color:var(--text-dim);}
+
+/* ---------- Center: menu preview ---------- */
+.center-col{
+  padding:34px 24px 60px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:18px;
+}
+.menu-frame-label{
+  display:flex;align-items:center;gap:10px;color:var(--text-dim);font-size:12.5px;
+}
+.menu-frame-label .dot{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);}
+
+.chest-panel{
+  background:linear-gradient(180deg,#2c2a30,#211f25);
+  border:1px solid #100f13;
+  border-radius:6px;
+  padding:20px;
+  box-shadow:
+    0 20px 45px -15px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  width:min(94vw, 560px);
+}
+.chest-title-row{
+  display:flex;align-items:center;justify-content:center;
+  padding:0 6px 14px;
+}
+.chest-title{
+  font-family:var(--font-mono);font-weight:700;font-size:15px;color:#f0ead6;
+  text-shadow:1px 1px 0 rgba(0,0,0,0.6);
+  letter-spacing:0.3px;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(9, 1fr);
+  gap:4px;
+  background:#232025;
+  padding:10px;
+  border-radius:4px;
+  border:1px solid #100f13;
+}
+.slot{
+  aspect-ratio:1;
+  background:var(--slot-bg);
+  border-top:3px solid var(--slot-light);
+  border-left:3px solid var(--slot-light);
+  border-right:3px solid var(--slot-dark);
+  border-bottom:3px solid var(--slot-dark);
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  image-rendering:pixelated;
+  transition:filter 0.08s;
+}
+.slot.empty{cursor:default;}
+.slot.filled{cursor:pointer;}
+.slot.filled:hover{filter:brightness(1.12);}
+.slot.drop-target{
+  border-top-color:var(--lime);border-left-color:var(--lime);
+  filter:brightness(1.25);
+}
+.slot.selected{
+  box-shadow:0 0 0 2px var(--lime) inset, 0 0 12px rgba(143,209,79,0.5);
+}
+.slot img{width:76%;height:76%;object-fit:contain;image-rendering:pixelated;pointer-events:none;}
+.slot .fallback{font-family:var(--font-mono);font-weight:700;font-size:clamp(10px,2vw,14px);color:#2b2b2b;pointer-events:none;}
+.slot .qty{
+  position:absolute;right:2px;bottom:0px;
+  font-family:var(--font-mono);font-weight:700;font-size:clamp(9px,1.6vw,12px);
+  color:#fff;text-shadow:1.5px 1.5px 0 #000, -1px -1px 0 #000;
+  pointer-events:none;
+}
+.slot .enchant-glow{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg, rgba(163,93,232,0.35), transparent 60%);
+  pointer-events:none;
+}
+.slot .slot-idx{
+  position:absolute;left:2px;top:1px;font-size:8px;color:rgba(0,0,0,0.35);font-family:var(--font-mono);pointer-events:none;
+}
+.slot .del-x{
+  position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;
+  background:var(--danger);color:#fff;font-size:11px;line-height:16px;text-align:center;
+  display:none;font-weight:800;border:1px solid #7a2222;
+}
+.slot.filled:hover .del-x{display:block;}
+
+.grid-footnote{color:var(--text-faint);font-size:11.5px;text-align:center;max-width:480px;line-height:1.5;}
+
+/* ---------- Editor panel ---------- */
+.editor-col{
+  padding:18px;border-left:1px solid var(--border);
+  position:sticky;top:65px;height:calc(100vh - 65px);overflow-y:auto;
+}
+.editor-empty{
+  height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:var(--text-faint);gap:10px;padding:20px;
+}
+.editor-empty svg{width:36px;height:36px;opacity:0.5;}
+.editor-empty p{font-size:12.5px;line-height:1.5;max-width:220px;margin:0;}
+
+.editor-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.editor-head .ico{
+  width:38px;height:38px;background:var(--slot-bg);flex:0 0 auto;
+  border-top:2px solid var(--slot-light);border-left:2px solid var(--slot-light);
+  border-right:2px solid var(--slot-dark);border-bottom:2px solid var(--slot-dark);
+  display:flex;align-items:center;justify-content:center;
+}
+.editor-head .ico img{width:76%;height:76%;object-fit:contain;image-rendering:pixelated;}
+.editor-head-text{min-width:0;}
+.editor-head-text .slot-num{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.5px;}
+.editor-head-text .mat-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;}
+
+.efield{margin-bottom:14px;}
+.efield label{
+  display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-faint);
+  font-weight:700;margin-bottom:6px;
+}
+.efield .desc{font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4;}
+.einput{
+  width:100%;background:var(--panel-2);border:1px solid var(--border);border-bottom:2px solid #0e0d10;
+  border-radius:4px;padding:8px 10px;color:var(--text);font-size:13px;
+}
+.einput.error{border-color:var(--danger);}
+.error-msg{color:var(--danger);font-size:11px;margin-top:5px;}
+textarea.einput{resize:vertical;min-height:70px;font-family:var(--font-mono);line-height:1.5;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+.material-search{position:relative;}
+.material-search-results{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;
+  background:#17161a;border:1px solid var(--border-light);border-radius:4px;
+  max-height:220px;overflow-y:auto;box-shadow:0 10px 24px rgba(0,0,0,0.5);
+}
+.material-search-results .opt{
+  display:flex;align-items:center;gap:8px;padding:7px 9px;font-size:12.5px;cursor:pointer;
+}
+.material-search-results .opt:hover{background:var(--panel-3);}
+.material-search-results .opt img{width:20px;height:20px;image-rendering:pixelated;}
+.material-search-results .opt .fb{width:20px;height:20px;background:var(--slot-bg);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--font-mono);color:#222;}
+
+.chip-list{display:flex;flex-direction:column;gap:6px;}
+.chip-row{display:flex;gap:6px;align-items:center;}
+.chip-row .einput{flex:1;}
+.chip-remove{
+  width:30px;height:34px;flex:0 0 auto;background:var(--panel-2);border:1px solid var(--border);border-radius:4px;
+  color:var(--danger);font-size:15px;font-weight:700;line-height:1;
+}
+.chip-remove:hover{background:rgba(225,92,92,0.14);}
+.add-chip-btn{
+  font-size:12px;color:var(--lime);background:transparent;border:1px dashed var(--border-light);
+  border-radius:4px;padding:7px 10px;width:100%;text-align:center;font-weight:600;
+}
+.add-chip-btn:hover{background:rgba(143,209,79,0.08);border-color:var(--lime-dim);}
+
+.checkbox-row{display:flex;align-items:center;gap:9px;}
+.checkbox-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--lime);}
+.checkbox-row label{margin:0;font-size:12.5px;text-transform:none;letter-spacing:0;color:var(--text);font-weight:500;}
+
+.editor-actions{display:flex;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.editor-actions .btn{flex:1;justify-content:center;}
+
+/* ---------- Modal ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(8,7,10,0.72);backdrop-filter:blur(2px);
+  display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;
+}
+.modal{
+  background:var(--panel);border:1px solid var(--border-light);border-radius:8px;
+  width:min(94vw, 640px);max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 30px 60px rgba(0,0,0,0.55);
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+}
+.modal-head h2{margin:0;font-size:15px;font-weight:700;}
+.modal-close{background:transparent;border:none;color:var(--text-faint);font-size:20px;padding:2px 6px;border-radius:4px;}
+.modal-close:hover{color:var(--text);background:var(--panel-3);}
+.modal-body{padding:18px 20px;overflow-y:auto;}
+.modal-actions{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;}
+.modal-actions .btn{flex:1;justify-content:center;min-width:180px;}
+
+.yaml-box{
+  background:#0e0d10;border:1px solid var(--border);border-radius:6px;padding:14px;
+  font-family:var(--font-mono);font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto;
+  color:#c9e6a8;max-height:340px;overflow-y:auto;
+}
+.copy-flash{color:var(--lime);font-size:12.5px;margin-top:8px;display:flex;align-items:center;gap:6px;}
+
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+  background:#17161a;border:1px solid var(--border-light);color:var(--text);
+  padding:10px 16px;border-radius:6px;font-size:13px;z-index:200;
+  box-shadow:0 12px 30px rgba(0,0,0,0.5);
+  display:flex;align-items:center;gap:8px;
+  animation:toast-in 0.18s ease;
+}
+.toast.err{border-color:rgba(225,92,92,0.5);}
+.toast .tico{width:14px;height:14px;flex:0 0 auto;}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,8px);}to{opacity:1;transform:translate(-50%,0);}}
+
+.confirm-modal .modal{width:min(92vw,380px);}
+.confirm-modal .modal-body{font-size:13.5px;color:var(--text-dim);line-height:1.5;}
+
+.mobile-editor-toggle{display:none;}
+@media (max-width:1180px){
+  .mobile-editor-toggle{
+    display:flex;position:fixed;right:16px;bottom:16px;z-index:50;
+    width:52px;height:52px;border-radius:50%;background:var(--lime);color:#182607;
+    align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,0.5);border:none;
+  }
+}
+@media (max-width:640px){
+  .topbar{gap:10px;padding:12px 14px;}
+  .top-input{min-width:140px;}
+  .center-col{padding:18px 10px 70px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon"></div>
+    <div>
+      <div class="brand-text">DELUXEMENUS<br>CONSTRUCTOR</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="menuTitleInput">Название меню</label>
+    <input id="menuTitleInput" class="top-input" type="text" maxlength="80" placeholder="&8Моё меню">
+  </div>
+
+  <div class="field">
+    <label for="openCommandInput">Команда открытия</label>
+    <input id="openCommandInput" class="top-input" style="min-width:140px" type="text" maxlength="40" placeholder="menu">
+  </div>
+
+  <div class="field">
+    <label>Рядов (1–6)</label>
+    <div class="rows-stepper">
+      <button class="stepper-btn" id="rowsMinus" aria-label="Меньше рядов">−</button>
+      <div class="rows-value" id="rowsValue">6</div>
+      <button class="stepper-btn" id="rowsPlus" aria-label="Больше рядов">+</button>
+    </div>
+  </div>
+
+  <div class="topbar-spacer"></div>
+
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" id="undoBtn" title="Отменить последнее действие">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+      Отменить
+    </button>
+    <button class="btn btn-ghost btn-danger" id="clearBtn" title="Очистить всё меню">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      Очистить
+    </button>
+    <button class="btn btn-primary" id="doneBtn">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      Готово
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: item library -->
+  <div class="side-panel">
+    <div class="panel-title">Предметы Minecraft</div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="itemSearch" placeholder="Поиск предмета…" class="top-input" style="min-width:0;width:100%;padding-left:32px;">
+    </div>
+    <div class="item-list" id="itemList"></div>
+    <div class="hint-block">Перетащите предмет из списка на нужный слот меню, либо кликните по пустому слоту для выбора предмета вручную.</div>
+  </div>
+
+  <!-- CENTER: chest preview -->
+  <div class="center-col">
+    <div class="menu-frame-label"><span class="dot"></span> Предпросмотр GUI · <span id="sizeLabel">54 слота</span></div>
+    <div class="chest-panel">
+      <div class="chest-title-row"><div class="chest-title" id="chestTitlePreview">Меню</div></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="grid-footnote">Клик по занятому слоту открывает редактор справа. Пустой слот — перетащите на него предмет из списка слева или кликните, чтобы выбрать предмет вручную.</div>
+  </div>
+
+  <!-- RIGHT: editor -->
+  <div class="editor-col" id="editorCol">
+    <div id="editorContent"></div>
+  </div>
+</div>
+
+<button class="mobile-editor-toggle" id="mobileEditorToggle" aria-label="Открыть редактор предмета">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 20 9-9-3-3-9 9v3h3Z"/><path d="m14 6 3 3"/></svg>
+</button>
+
+<div id="toastRoot"></div>
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================== DATA ============================== */
+
+const MC_VERSION = "1.21.1";
+const ITEM_TEX = id => `https://cdn.jsdelivr.net/gh/PrismarineJS/minecraft-assets@master/data/${MC_VERSION}/items/${id}.png`;
+const BLOCK_TEX = id => `https://cdn.jsdelivr.net/gh/PrismarineJS/minecraft-assets@master/data/${MC_VERSION}/blocks/${id}.png`;
+
+const COLORS = ["white","orange","magenta","light_blue","yellow","lime","pink","gray","light_gray","cyan","purple","blue","brown","green","red","black"];
+
+const BASE_ITEMS = [
+  // Building / natural
+  "stone","cobblestone","dirt","grass_block","podzol","sand","gravel","clay","obsidian","bedrock",
+  "oak_planks","oak_log","spruce_log","birch_log","oak_sapling","bookshelf","ladder","glass","glass_pane",
+  "sandstone","red_sandstone","netherrack","soul_sand","soul_soil","end_stone","prismarine","sea_lantern",
+  "quartz_block","purpur_block","glowstone","crying_obsidian","respawn_anchor","bone_block","mud","packed_mud",
+  "moss_block","mangrove_roots","deepslate","tuff","calcite","dripstone_block","amethyst_block",
+  // Ores / minerals
+  "coal_ore","coal","iron_ore","iron_ingot","gold_ore","gold_ingot","gold_nugget","diamond_ore","diamond",
+  "emerald_ore","emerald","lapis_ore","lapis_lazuli","redstone_ore","redstone","nether_gold_ore",
+  "nether_quartz_ore","quartz","ancient_debris","netherite_scrap","netherite_ingot","copper_ore","copper_ingot",
+  "raw_iron","raw_gold","raw_copper","amethyst_shard",
+  // Tools
+  "wooden_sword","stone_sword","golden_sword","iron_sword","diamond_sword","netherite_sword",
+  "wooden_pickaxe","stone_pickaxe","golden_pickaxe","iron_pickaxe","diamond_pickaxe","netherite_pickaxe",
+  "wooden_axe","stone_axe","golden_axe","iron_axe","diamond_axe","netherite_axe",
+  "wooden_shovel","stone_shovel","golden_shovel","iron_shovel","diamond_shovel","netherite_shovel",
+  "wooden_hoe","stone_hoe","golden_hoe","iron_hoe","diamond_hoe","netherite_hoe",
+  "bow","crossbow","trident","shield","fishing_rod","flint_and_steel","shears","brush","spyglass",
+  "carrot_on_a_stick","warped_fungus_on_a_stick","compass","clock","lead","name_tag","saddle",
+  // Armor
+  "leather_helmet","leather_chestplate","leather_leggings","leather_boots",
+  "iron_helmet","iron_chestplate","iron_leggings","iron_boots",
+  "golden_helmet","golden_chestplate","golden_leggings","golden_boots",
+  "diamond_helmet","diamond_chestplate","diamond_leggings","diamond_boots",
+  "netherite_helmet","netherite_chestplate","netherite_leggings","netherite_boots",
+  "turtle_helmet","elytra",
+  // Food
+  "apple","golden_apple","enchanted_golden_apple","bread","cake","cookie","melon_slice","pumpkin_pie",
+  "carrot","golden_carrot","potato","baked_potato","poisonous_potato","beetroot","beetroot_soup",
+  "cooked_beef","beef","cooked_porkchop","porkchop","cooked_chicken","chicken","cooked_mutton","mutton",
+  "cooked_rabbit","rabbit","cooked_cod","cod","cooked_salmon","salmon","rotten_flesh","spider_eye",
+  "sweet_berries","glow_berries","honey_bottle","milk_bucket","mushroom_stew","suspicious_stew","pumpkin_seeds",
+  // Brewing
+  "potion","splash_potion","lingering_potion","glass_bottle","blaze_powder","blaze_rod","nether_wart",
+  "ghast_tear","fermented_spider_eye","glistering_melon_slice","phantom_membrane","rabbit_foot",
+  "magma_cream","dragon_breath","turtle_helmet",
+  // Redstone / mechanisms
+  "redstone_block","redstone_torch","repeater","comparator","piston","sticky_piston","observer",
+  "dispenser","dropper","hopper","tnt","lever","tripwire_hook","daylight_detector","target","note_block",
+  "chest","trapped_chest","ender_chest","barrel","furnace","blast_furnace","smoker","crafting_table",
+  "anvil","grindstone","smithing_table","enchanting_table","lectern","cartography_table","loom",
+  "stonecutter","brewing_stand","beacon","conduit","lodestone","end_rod","chain",
+  // Misc / GUI staples
+  "arrow","spectral_arrow","barrier","structure_void","light","player_head","zombie_head","skeleton_skull",
+  "wither_skeleton_skull","creeper_head","dragon_head","piglin_head","writable_book","written_book",
+  "enchanted_book","paper","map","filled_map","firework_rocket","firework_star","totem_of_undying",
+  "nether_star","ender_eye","ender_pearl","experience_bottle","nautilus_shell","heart_of_the_sea",
+  "trident","elytra","shulker_shell","string","spider_eye","bone","bone_meal","gunpowder","slime_ball",
+  "magma_block","ice","packed_ice","blue_ice","snowball","snow_block","music_disc_cat","music_disc_pigstep",
+  "book","feather","egg","bucket","water_bucket","lava_bucket","flower_pot",
+];
+
+function buildItemList(){
+  const list = BASE_ITEMS.map(id => ({id, group:"item"}));
+  // Colored variants
+  const coloredCats = ["wool","stained_glass_pane","concrete","concrete_powder","terracotta","carpet","banner","bed","shulker_box","candle"];
+  coloredCats.forEach(cat=>{
+    COLORS.forEach(c=>{
+      let id;
+      if(cat==="banner") id = `${c}_banner`;
+      else if(cat==="bed") id = `${c}_bed`;
+      else if(cat==="shulker_box") id = `${c}_shulker_box`;
+      else if(cat==="candle") id = `${c}_candle`;
+      else id = `${c}_${cat}`;
+      list.push({id, group:"block"});
+    });
+  });
+  list.push({id:"glass_pane", group:"item"});
+  // de-dupe
+  const seen = new Set();
+  return list.filter(it=>{
+    if(seen.has(it.id)) return false;
+    seen.add(it.id);
+    return true;
+  }).sort((a,b)=> a.id.localeCompare(b.id));
+}
+
+const ITEM_LIST = buildItemList();
+
+function idToDisplayName(id){
+  return id.split("_").map(w=> w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+}
+function idToMaterial(id){
+  return id.toUpperCase();
+}
+function materialToId(material){
+  return String(material||"").trim().toLowerCase();
+}
+
+const ENCHANTMENTS = [
+  "PROTECTION","FIRE_PROTECTION","FEATHER_FALLING","BLAST_PROTECTION","PROJECTILE_PROTECTION",
+  "RESPIRATION","AQUA_AFFINITY","THORNS","DEPTH_STRIDER","FROST_WALKER","BINDING_CURSE",
+  "SHARPNESS","SMITE","BANE_OF_ARTHROPODS","KNOCKBACK","FIRE_ASPECT","LOOTING","SWEEPING_EDGE",
+  "EFFICIENCY","SILK_TOUCH","UNBREAKING","FORTUNE","POWER","PUNCH","FLAME","INFINITY",
+  "LUCK_OF_THE_SEA","LURE","LOYALTY","IMPALING","RIPTIDE","CHANNELING","MULTISHOT","QUICK_CHARGE",
+  "PIERCING","MENDING","VANISHING_CURSE","SOUL_SPEED","SWIFT_SNEAK"
+];
+
+/* ============================== STATE ============================== */
+
+let state = {
+  menuTitle: "&8Моё меню",
+  openCommand: "menu",
+  rows: 6,
+  items: {} // slotIndex(string) -> itemObject
+};
+
+let history = [];
+const HISTORY_LIMIT = 30;
+let selectedSlot = null; // number or null
+let draggedFromSlot = null; // number or null while dragging an in-grid item
+let pendingEmptySlot = null; // slot chosen for manual "add item" flow
+let saveTimer = null;
+
+function cloneState(s){ return JSON.parse(JSON.stringify(s)); }
+
+function pushHistory(){
+  history.push(cloneState(state));
+  if(history.length > HISTORY_LIMIT) history.shift();
+  updateUndoBtn();
+}
+
+function applyState(next, {select=undefined}={}){
+  state = next;
+  if(select !== undefined) selectedSlot = select;
+  renderAll();
+  scheduleSave();
+}
+
+function updateUndoBtn(){
+  document.getElementById("undoBtn").disabled = history.length === 0;
+}
+
+/* ============================== PERSISTENCE ============================== */
+
+const STORAGE_KEY = "deluxemenus-constructor-state-v1";
+
+async function loadState(){
+  try{
+    if(window.storage && window.storage.get){
+      const res = await window.storage.get(STORAGE_KEY, false);
+      if(res && res.value){
+        const parsed = JSON.parse(res.value);
+        if(parsed && typeof parsed === "object"){
+          state = Object.assign({menuTitle:"&8Моё меню", openCommand:"menu", rows:6, items:{}}, parsed);
+        }
+      }
+    }
+  }catch(e){
+    // no saved state yet, or storage unavailable — start fresh
+    console.warn("Не удалось загрузить сохранённое состояние:", e);
+  }
+}
+
+function scheduleSave(){
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 350);
+}
+
+async function saveState(){
+  try{
+    if(window.storage && window.storage.set){
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    }
+  }catch(e){
+    console.warn("Не удалось сохранить состояние:", e);
+    showToast("Не удалось сохранить прогресс в браузере", true);
+  }
+}
+
+/* ============================== UTIL ============================== */
+
+function escHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function iconImgHtml(materialId, alt, fallbackClass){
+  const itemUrl = ITEM_TEX(materialId);
+  const blockUrl = BLOCK_TEX(materialId);
+  const letters = escHtml((idToDisplayName(materialId).match(/\b\w/g)||["?"]).slice(0,2).join(""));
+  return `<img src="${itemUrl}" alt="${escHtml(alt)}"
+      data-fallback-tried="0"
+      data-block-url="${blockUrl}"
+      data-letters="${letters}"
+      onerror="window.__mcIconFallback(this)">`;
+}
+
+window.__mcIconFallback = function(img){
+  const tried = img.getAttribute("data-fallback-tried");
+  if(tried === "0"){
+    img.setAttribute("data-fallback-tried","1");
+    img.src = img.getAttribute("data-block-url");
+    return;
+  }
+  const span = document.createElement("span");
+  span.className = "fallback";
+  span.textContent = img.getAttribute("data-letters") || "?";
+  img.replaceWith(span);
+};
+
+function showToast(msg, isErr){
+  const root = document.getElementById("toastRoot");
+  const el = document.createElement("div");
+  el.className = "toast" + (isErr ? " err" : "");
+  el.innerHTML = (isErr
+    ? `<svg class="tico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>`
+    : `<svg class="tico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>`
+  ) + `<span>${escHtml(msg)}</span>`;
+  root.appendChild(el);
+  setTimeout(()=>{ el.style.transition="opacity .25s"; el.style.opacity="0"; setTimeout(()=>el.remove(), 260); }, 2400);
+}
+
+function defaultItemFor(id){
+  return {
+    material: idToMaterial(id),
+    displayName: idToDisplayName(id),
+    lore: [],
+    amount: 1,
+    customModelData: "",
+    enchantments: [],
+    hideEnchantments: false,
+    priority: "",
+    commands: []
+  };
+}
+
+/* ============================== RENDER: item library ============================== */
+
+function renderItemList(){
+  const query = document.getElementById("itemSearch").value.trim().toLowerCase();
+  const wrap = document.getElementById("itemList");
+  const filtered = query
+    ? ITEM_LIST.filter(it => it.id.includes(query) || idToDisplayName(it.id).toLowerCase().includes(query))
+    : ITEM_LIST;
+
+  if(filtered.length === 0){
+    wrap.innerHTML = `<div class="item-list-empty">Ничего не найдено по запросу «${escHtml(query)}».<br>Попробуйте другое название или ID материала.</div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  filtered.slice(0, 400).forEach(it=>{
+    const div = document.createElement("div");
+    div.className = "lib-slot";
+    div.draggable = true;
+    div.dataset.itemId = it.id;
+    div.innerHTML = iconImgHtml(it.id, idToDisplayName(it.id)) + `<div class="lib-name-tip">${escHtml(idToDisplayName(it.id))}</div>`;
+    div.addEventListener("dragstart", (e)=>{
+      e.dataTransfer.setData("application/json", JSON.stringify({type:"new", itemId: it.id}));
+      e.dataTransfer.effectAllowed = "copy";
+    });
+    div.addEventListener("click", ()=>{
+      // Quick-add: if a slot is selected and empty, or fall back to first empty slot
+      let target = (selectedSlot!==null && !state.items[selectedSlot]) ? selectedSlot : firstEmptySlot();
+      if(target === null){ showToast("Нет свободных слотов — увеличьте число рядов", true); return; }
+      pushHistory();
+      state.items[target] = defaultItemFor(it.id);
+      selectedSlot = target;
+      renderAll();
+      scheduleSave();
+    });
+    frag.appendChild(div);
+  });
+  wrap.innerHTML = "";
+  wrap.appendChild(frag);
+}
+
+function firstEmptySlot(){
+  const total = state.rows*9;
+  for(let i=0;i<total;i++){ if(!state.items[i]) return i; }
+  return null;
+}
+
+/* ============================== RENDER: grid ============================== */
+
+function renderGrid(){
+  document.getElementById("sizeLabel").textContent = `${state.rows*9} слотов (${state.rows} ряд.)`;
+  document.getElementById("chestTitlePreview").textContent = stripColorCodes(state.menuTitle) || "Меню";
+  document.getElementById("rowsValue").textContent = state.rows;
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const total = state.rows * 9;
+  for(let i=0;i<total;i++){
+    const it = state.items[i];
+    const slot = document.createElement("div");
+    slot.className = "slot " + (it ? "filled" : "empty") + (selectedSlot===i ? " selected" : "");
+    slot.dataset.slot = i;
+
+    if(it){
+      slot.innerHTML =
+        (it.enchantments && it.enchantments.length ? `<div class="enchant-glow"></div>` : "") +
+        iconImgHtml(materialToId(it.material), it.displayName || it.material) +
+        `<div class="slot-idx">${i}</div>` +
+        (it.amount && it.amount>1 ? `<div class="qty">${escHtml(it.amount)}</div>` : "") +
+        `<div class="del-x" data-del="${i}" title="Удалить предмет">×</div>`;
+      slot.draggable = true;
+      slot.addEventListener("dragstart", (e)=>{
+        draggedFromSlot = i;
+        e.dataTransfer.setData("application/json", JSON.stringify({type:"move", fromSlot:i}));
+        e.dataTransfer.effectAllowed = "move";
+      });
+      slot.addEventListener("dragend", ()=>{ draggedFromSlot = null; });
+      slot.addEventListener("click", (e)=>{
+        if(e.target.closest(".del-x")) return; // handled separately
+        selectedSlot = i;
+        renderAll();
+      });
+    } else {
+      slot.addEventListener("click", ()=>{
+        openManualAddPanel(i);
+      });
+    }
+
+    slot.addEventListener("dragover", (e)=>{ e.preventDefault(); slot.classList.add("drop-target"); });
+    slot.addEventListener("dragleave", ()=> slot.classList.remove("drop-target"));
+    slot.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      slot.classList.remove("drop-target");
+      let data;
+      try{ data = JSON.parse(e.dataTransfer.getData("application/json")); }catch(err){ return; }
+      if(!data) return;
+      if(data.type === "new"){
+        pushHistory();
+        state.items[i] = defaultItemFor(data.itemId);
+        selectedSlot = i;
+        renderAll(); scheduleSave();
+      } else if(data.type === "move"){
+        const from = data.fromSlot;
+        if(from === i) return;
+        pushHistory();
+        const moving = state.items[from];
+        const existing = state.items[i];
+        state.items[i] = moving;
+        if(existing) state.items[from] = existing; else delete state.items[from];
+        selectedSlot = i;
+        renderAll(); scheduleSave();
+      }
+    });
+
+    grid.appendChild(slot);
+  }
+
+  // delete buttons
+  grid.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute("data-del"),10);
+      pushHistory();
+      delete state.items[idx];
+      if(selectedSlot === idx) selectedSlot = null;
+      renderAll(); scheduleSave();
+      showToast("Предмет удалён");
+    });
+  });
+}
+
+function stripColorCodes(s){
+  return String(s||"").replace(/&[0-9a-fk-or]/gi, "");
+}
+
+/* ============================== RENDER: editor ============================== */
+
+function openManualAddPanel(slotIdx){
+  pendingEmptySlot = slotIdx;
+  selectedSlot = null;
+  renderEditor();
+  document.getElementById("editorCol").classList.add("mobile-visible");
+}
+
+function renderEditor(){
+  const wrap = document.getElementById("editorContent");
+
+  if(pendingEmptySlot !== null){
+    wrap.innerHTML = renderManualAddForm(pendingEmptySlot);
+    bindManualAddForm();
+    return;
+  }
+
+  if(selectedSlot === null || !state.items[selectedSlot]){
+    wrap.innerHTML = `
+      <div class="editor-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <p>Выберите предмет в сетке меню, чтобы настроить его параметры, либо перетащите новый предмет из списка слева.</p>
+      </div>`;
+    return;
+  }
+
+  const idx = selectedSlot;
+  const it = state.items[idx];
+  const matId = materialToId(it.material);
+
+  wrap.innerHTML = `
+    <div class="editor-head">
+      <div class="ico">${iconImgHtml(matId, it.displayName)}</div>
+      <div class="editor-head-text">
+        <div class="slot-num">Слот ${idx}</div>
+        <div class="mat-name">${escHtml(it.displayName || it.material)}</div>
+      </div>
+    </div>
+
+    <div class="efield">
+      <label for="f_material">Material / ID предмета</label>
+      <div class="material-search">
+        <input type="text" class="einput" id="f_material" value="${escHtml(it.material)}" autocomplete="off" placeholder="DIAMOND_SWORD">
+        <div class="material-search-results" id="materialResults" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="efield">
+      <label for="f_name">Название предмета</label>
+      <input type="text" class="einput" id="f_name" value="${escHtml(it.displayName)}" placeholder="&aКрутой меч">
+    </div>
+
+    <div class="efield">
+      <label for="f_lore">Lore (по строке на каждую)</label>
+      <textarea class="einput" id="f_lore" placeholder="&7Первая строка&#10;&7Вторая строка">${escHtml((it.lore||[]).join("\n"))}</textarea>
+      <div class="desc">Каждая строка — отдельный пункт lore. Поддерживаются цветовые коды (&amp;a, &amp;7 и т.д.)</div>
+    </div>
+
+    <div class="two-col">
+      <div class="efield">
+        <label for="f_amount">Количество</label>
+        <input type="number" class="einput" id="f_amount" min="1" max="64" value="${escHtml(it.amount)}">
+        <div class="error-msg" id="err_amount" style="display:none;">От 1 до 64</div>
+      </div>
+      <div class="efield">
+        <label for="f_slot">Slot</label>
+        <input type="number" class="einput" id="f_slot" min="0" max="${state.rows*9-1}" value="${idx}">
+        <div class="error-msg" id="err_slot" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="efield">
+      <label for="f_cmd">Custom Model Data</label>
+      <input type="number" class="einput" id="f_cmd" value="${escHtml(it.customModelData)}" placeholder="напр. 1001">
+    </div>
+
+    <div class="efield">
+      <label>Enchantments</label>
+      <div class="chip-list" id="enchList"></div>
+      <button class="add-chip-btn" id="addEnchant" type="button" style="margin-top:6px;">+ Добавить зачарование</button>
+    </div>
+
+    <div class="efield checkbox-row">
+      <input type="checkbox" id="f_hideEnch" ${it.hideEnchantments ? "checked" : ""}>
+      <label for="f_hideEnch">Hide Enchantments (ItemFlags.HIDE_ENCHANTS)</label>
+    </div>
+
+    <div class="efield">
+      <label for="f_priority">Priority</label>
+      <input type="number" class="einput" id="f_priority" value="${escHtml(it.priority)}" placeholder="необязательно">
+      <div class="desc">Порядок применения requirement-слоёв DeluxeMenus (необязательно).</div>
+    </div>
+
+    <div class="efield">
+      <label>Click Commands</label>
+      <div class="chip-list" id="cmdList"></div>
+      <button class="add-chip-btn" id="addCommand" type="button" style="margin-top:6px;">+ Добавить команду</button>
+      <div class="desc">Например: [CONSOLE] give %player_name% diamond 1</div>
+    </div>
+
+    <div class="editor-actions">
+      <button class="btn btn-danger" id="deleteItemBtn">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Удалить
+      </button>
+      <button class="btn btn-primary" id="saveItemBtn">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+        Сохранить
+      </button>
+    </div>
+  `;
+
+  renderChipList("enchList", it.enchantments.map(en=> `${en.id}:${en.level}`), "ЗАЧАРОВАНИЕ:УРОВЕНЬ");
+  renderChipList("cmdList", it.commands, "[CONSOLE] команда...");
+
+  document.getElementById("addEnchant").addEventListener("click", ()=> addChipRow("enchList","SHARPNESS:1"));
+  document.getElementById("addCommand").addEventListener("click", ()=> addChipRow("cmdList","[CONSOLE] give %player_name% diamond 1"));
+
+  bindMaterialSearch();
+
+  document.getElementById("saveItemBtn").addEventListener("click", ()=> commitEditorForm(idx));
+  document.getElementById("deleteItemBtn").addEventListener("click", ()=>{
+    pushHistory();
+    delete state.items[idx];
+    selectedSlot = null;
+    renderAll(); scheduleSave();
+    showToast("Предмет удалён");
+  });
+}
+
+function renderChipList(containerId, values, placeholder){
+  const el = document.getElementById(containerId);
+  el.innerHTML = "";
+  values.forEach(v=> el.appendChild(makeChipRow(v, placeholder)));
+}
+function makeChipRow(value, placeholder){
+  const row = document.createElement("div");
+  row.className = "chip-row";
+  row.innerHTML = `<input type="text" class="einput chip-input" value="${escHtml(value)}" placeholder="${escHtml(placeholder)}"><button type="button" class="chip-remove" aria-label="Удалить">×</button>`;
+  row.querySelector(".chip-remove").addEventListener("click", ()=> row.remove());
+  return row;
+}
+function addChipRow(containerId, defaultVal){
+  document.getElementById(containerId).appendChild(makeChipRow(defaultVal, ""));
+}
+
+function bindMaterialSearch(){
+  const input = document.getElementById("f_material");
+  const results = document.getElementById("materialResults");
+  input.addEventListener("input", ()=>{
+    const q = input.value.trim().toLowerCase();
+    if(!q){ results.style.display="none"; return; }
+    const matches = ITEM_LIST.filter(it=> it.id.includes(q.replace(/\s+/g,"_")) || idToDisplayName(it.id).toLowerCase().includes(q)).slice(0,30);
+    if(matches.length===0){ results.style.display="none"; return; }
+    results.innerHTML = matches.map(m=>
+      `<div class="opt" data-id="${escHtml(m.id)}"><span class="fb-wrap">${iconImgHtml(m.id, m.id)}</span>${escHtml(idToDisplayName(m.id))} <span style="color:var(--text-faint);margin-left:auto;font-family:var(--font-mono);font-size:10.5px;">${escHtml(idToMaterial(m.id))}</span></div>`
+    ).join("");
+    results.style.display="block";
+    results.querySelectorAll(".opt").forEach(opt=>{
+      opt.addEventListener("click", ()=>{
+        const id = opt.getAttribute("data-id");
+        input.value = idToMaterial(id);
+        const nameField = document.getElementById("f_name");
+        if(nameField && (!nameField.value || nameField.dataset.autofilled==="1")){
+          nameField.value = idToDisplayName(id);
+          nameField.dataset.autofilled = "1";
+        }
+        results.style.display="none";
+      });
+    });
+  });
+  document.addEventListener("click", (e)=>{
+    if(!e.target.closest(".material-search")) results.style.display="none";
+  }, {once:true});
+}
+
+function commitEditorForm(idx){
+  const material = document.getElementById("f_material").value.trim().toUpperCase().replace(/\s+/g,"_");
+  const name = document.getElementById("f_name").value;
+  const loreRaw = document.getElementById("f_lore").value;
+  const amountEl = document.getElementById("f_amount");
+  const slotEl = document.getElementById("f_slot");
+  const cmdField = document.getElementById("f_cmd").value.trim();
+  const priorityField = document.getElementById("f_priority").value.trim();
+  const hideEnch = document.getElementById("f_hideEnch").checked;
+
+  let hasError = false;
+  document.getElementById("err_amount").style.display = "none";
+  document.getElementById("err_slot").style.display = "none";
+  document.getElementById("f_amount").classList.remove("error");
+  document.getElementById("f_slot").classList.remove("error");
+
+  if(!material){
+    showToast("Укажите Material / ID предмета", true);
+    return;
+  }
+
+  const amount = parseInt(amountEl.value, 10);
+  if(isNaN(amount) || amount < 1 || amount > 64){
+    document.getElementById("err_amount").style.display="block";
+    document.getElementById("f_amount").classList.add("error");
+    hasError = true;
+  }
+
+  const newSlot = parseInt(slotEl.value, 10);
+  const maxSlot = state.rows*9 - 1;
+  if(isNaN(newSlot) || newSlot < 0 || newSlot > maxSlot){
+    document.getElementById("err_slot").textContent = `Slot должен быть от 0 до ${maxSlot}`;
+    document.getElementById("err_slot").style.display="block";
+    document.getElementById("f_slot").classList.add("error");
+    hasError = true;
+  } else if(newSlot !== idx && state.items[newSlot]){
+    document.getElementById("err_slot").textContent = `Слот ${newSlot} уже занят`;
+    document.getElementById("err_slot").style.display="block";
+    document.getElementById("f_slot").classList.add("error");
+    hasError = true;
+  }
+
+  if(hasError) return;
+
+  const enchantments = Array.from(document.querySelectorAll("#enchList .chip-input"))
+    .map(i=>i.value.trim()).filter(Boolean)
+    .map(v=>{
+      const [id, lvl] = v.split(":").map(s=>s && s.trim());
+      return {id: (id||"").toUpperCase().replace(/\s+/g,"_"), level: parseInt(lvl,10) || 1};
+    })
+    .filter(e=>e.id);
+
+  const commands = Array.from(document.querySelectorAll("#cmdList .chip-input"))
+    .map(i=>i.value.trim()).filter(Boolean);
+
+  const lore = loreRaw.split("\n").map(l=>l.replace(/\r/g,"")).filter((l,i,arr)=> !(l==="" && i===arr.length-1));
+
+  const newItem = {
+    material,
+    displayName: name,
+    lore,
+    amount,
+    customModelData: cmdField,
+    enchantments,
+    hideEnchantments: hideEnch,
+    priority: priorityField,
+    commands
+  };
+
+  pushHistory();
+  if(newSlot !== idx){
+    delete state.items[idx];
+  }
+  state.items[newSlot] = newItem;
+  selectedSlot = newSlot;
+  renderAll();
+  scheduleSave();
+  showToast("Предмет сохранён");
+}
+
+function renderManualAddForm(slotIdx){
+  return `
+    <div class="editor-head">
+      <div class="ico" style="display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      </div>
+      <div class="editor-head-text">
+        <div class="slot-num">Слот ${slotIdx}</div>
+        <div class="mat-name">Пустой слот</div>
+      </div>
+    </div>
+    <div class="efield">
+      <label for="f_manual_material">Выберите предмет</label>
+      <div class="material-search">
+        <input type="text" class="einput" id="f_manual_material" autocomplete="off" placeholder="Начните вводить: diamond, wool, arrow…">
+        <div class="material-search-results" id="manualResults"></div>
+      </div>
+      <div class="desc">Найдите предмет по названию или ID и нажмите на него, чтобы добавить его в этот слот.</div>
+    </div>
+    <div class="editor-actions">
+      <button class="btn" id="cancelManual" style="flex:1;justify-content:center;">Отмена</button>
+    </div>
+  `;
+}
+
+function bindManualAddForm(){
+  const input = document.getElementById("f_manual_material");
+  const results = document.getElementById("manualResults");
+  input.focus();
+  function runSearch(){
+    const q = input.value.trim().toLowerCase();
+    const list = q ? ITEM_LIST.filter(it=> it.id.includes(q.replace(/\s+/g,"_")) || idToDisplayName(it.id).toLowerCase().includes(q)) : ITEM_LIST.slice(0,40);
+    results.innerHTML = list.slice(0,40).map(m=>
+      `<div class="opt" data-id="${escHtml(m.id)}">${iconImgHtml(m.id, m.id)}${escHtml(idToDisplayName(m.id))}</div>`
+    ).join("") || `<div class="opt" style="cursor:default;color:var(--text-faint);">Ничего не найдено</div>`;
+    results.style.display = "block";
+    results.querySelectorAll(".opt[data-id]").forEach(opt=>{
+      opt.addEventListener("click", ()=>{
+        const id = opt.getAttribute("data-id");
+        pushHistory();
+        state.items[pendingEmptySlot] = defaultItemFor(id);
+        selectedSlot = pendingEmptySlot;
+        pendingEmptySlot = null;
+        renderAll(); scheduleSave();
+      });
+    });
+  }
+  runSearch();
+  input.addEventListener("input", runSearch);
+  document.getElementById("cancelManual").addEventListener("click", ()=>{
+    pendingEmptySlot = null;
+    renderAll();
+  });
+}
+
+/* ============================== RENDER ALL ============================== */
+
+function renderAll(){
+  renderGrid();
+  renderEditor();
+  document.getElementById("menuTitleInput").value = state.menuTitle;
+  document.getElementById("openCommandInput").value = state.openCommand;
+}
+
+/* ============================== YAML GENERATION ============================== */
+
+function yamlStr(s){
+  return `'${String(s).replace(/'/g,"''")}'`;
+}
+
+function generateYaml(){
+  const lines = [];
+  lines.push(`menu_title: ${yamlStr(state.menuTitle || "Menu")}`);
+  lines.push(`open_command: ${yamlStr(state.openCommand || "menu")}`);
+  lines.push(`size: ${state.rows*9}`);
+  lines.push(`items:`);
+
+  const slots = Object.keys(state.items).map(k=>parseInt(k,10)).sort((a,b)=>a-b);
+  if(slots.length === 0){
+    lines.push(`  {}`);
+  } else {
+    slots.forEach(slot=>{
+      const it = state.items[slot];
+      const key = `item_${slot}`;
+      lines.push(`  ${key}:`);
+      lines.push(`    material: ${it.material}`);
+      lines.push(`    slot: ${slot}`);
+      if(it.displayName) lines.push(`    display_name: ${yamlStr(it.displayName)}`);
+      if(it.lore && it.lore.length){
+        lines.push(`    lore:`);
+        it.lore.forEach(l=> lines.push(`      - ${yamlStr(l)}`));
+      }
+      if(it.amount && it.amount !== 1) lines.push(`    amount: ${it.amount}`);
+      if(it.customModelData !== "" && it.customModelData !== undefined && it.customModelData !== null){
+        lines.push(`    custom_model_data: ${it.customModelData}`);
+      }
+      if(it.enchantments && it.enchantments.length){
+        lines.push(`    enchantments:`);
+        it.enchantments.forEach(en=> lines.push(`      - ${en.id}:${en.level}`));
+      }
+      if(it.hideEnchantments) lines.push(`    hide_enchantments: true`);
+      if(it.priority !== "" && it.priority !== undefined && it.priority !== null) lines.push(`    priority: ${it.priority}`);
+      if(it.commands && it.commands.length){
+        lines.push(`    click_commands:`);
+        it.commands.forEach(c=> lines.push(`      - ${yamlStr(c)}`));
+      }
+    });
+  }
+  return lines.join("\n") + "\n";
+}
+
+/* ============================== MODALS ============================== */
+
+function openDoneModal(){
+  const yaml = generateYaml();
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `
+    <div class="modal-backdrop" id="doneBackdrop">
+      <div class="modal">
+        <div class="modal-head">
+          <h2>Меню готово</h2>
+          <button class="modal-close" id="doneClose" aria-label="Закрыть">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="yaml-box" id="yamlPreview">${escHtml(yaml)}</div>
+          <div class="copy-flash" id="copyFlash" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            Скопировано в буфер обмена
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="copyYamlBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Скопировать в буфер обмена
+          </button>
+          <button class="btn" id="downloadYamlBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            Скачать menu.yml
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("doneClose").addEventListener("click", closeModal);
+  document.getElementById("doneBackdrop").addEventListener("click", (e)=>{ if(e.target.id==="doneBackdrop") closeModal(); });
+  document.getElementById("copyYamlBtn").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(yaml);
+      document.getElementById("copyFlash").style.display = "flex";
+      showToast("YAML скопирован в буфер обмена");
+    }catch(e){
+      showToast("Не удалось скопировать автоматически — выделите текст вручную", true);
+    }
+  });
+  document.getElementById("downloadYamlBtn").addEventListener("click", ()=>{
+    const blob = new Blob([yaml], {type:"text/yaml"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeName = (stripColorCodes(state.menuTitle).trim().toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"") || "menu");
+    a.href = url;
+    a.download = `${safeName}.yml`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Файл menu.yml скачан");
+  });
+}
+
+function closeModal(){
+  document.getElementById("modalRoot").innerHTML = "";
+}
+
+function openConfirmModal(title, body, onConfirm){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `
+    <div class="modal-backdrop confirm-modal" id="confirmBackdrop">
+      <div class="modal">
+        <div class="modal-head"><h2>${escHtml(title)}</h2><button class="modal-close" id="confirmClose">×</button></div>
+        <div class="modal-body">${body}</div>
+        <div class="modal-actions">
+          <button class="btn" id="confirmCancel">Отмена</button>
+          <button class="btn btn-danger" id="confirmOk">Подтвердить</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("confirmClose").addEventListener("click", closeModal);
+  document.getElementById("confirmCancel").addEventListener("click", closeModal);
+  document.getElementById("confirmBackdrop").addEventListener("click",(e)=>{ if(e.target.id==="confirmBackdrop") closeModal(); });
+  document.getElementById("confirmOk").addEventListener("click", ()=>{ closeModal(); onConfirm(); });
+}
+
+/* ============================== TOP BAR EVENTS ============================== */
+
+document.getElementById("menuTitleInput").addEventListener("input", (e)=>{
+  state.menuTitle = e.target.value;
+  document.getElementById("chestTitlePreview").textContent = stripColorCodes(state.menuTitle) || "Меню";
+  scheduleSave();
+});
+document.getElementById("menuTitleInput").addEventListener("blur", pushHistoryIfChangedTitle);
+let lastTitleForHistory = state.menuTitle;
+function pushHistoryIfChangedTitle(){ /* lightweight: title edits don't spam history via keystrokes */ }
+
+document.getElementById("openCommandInput").addEventListener("input", (e)=>{
+  state.openCommand = e.target.value.replace(/^\/+/,"").trim();
+  scheduleSave();
+});
+
+document.getElementById("rowsMinus").addEventListener("click", ()=>{
+  if(state.rows <= 1) return;
+  const newRows = state.rows - 1;
+  const maxSlot = newRows*9 - 1;
+  const overflow = Object.keys(state.items).map(Number).filter(s=> s>maxSlot);
+  if(overflow.length){
+    openConfirmModal("Уменьшить число рядов?",
+      `В нижних рядах есть ${overflow.length} настроенных предмет(ов). Они будут удалены. Продолжить?`,
+      ()=>{
+        pushHistory();
+        overflow.forEach(s=> delete state.items[s]);
+        state.rows = newRows;
+        if(selectedSlot!==null && selectedSlot>maxSlot) selectedSlot=null;
+        renderAll(); scheduleSave();
+      });
+  } else {
+    pushHistory();
+    state.rows = newRows;
+    renderAll(); scheduleSave();
+  }
+});
+document.getElementById("rowsPlus").addEventListener("click", ()=>{
+  if(state.rows >= 6) return;
+  pushHistory();
+  state.rows += 1;
+  renderAll(); scheduleSave();
+});
+
+document.getElementById("undoBtn").addEventListener("click", ()=>{
+  if(history.length === 0) return;
+  const prev = history.pop();
+  state = prev;
+  if(selectedSlot!==null && !state.items[selectedSlot]) selectedSlot = null;
+  pendingEmptySlot = null;
+  updateUndoBtn();
+  renderAll();
+  scheduleSave();
+  showToast("Действие отменено");
+});
+
+document.getElementById("clearBtn").addEventListener("click", ()=>{
+  const count = Object.keys(state.items).length;
+  if(count === 0){ showToast("Меню уже пусто"); return; }
+  openConfirmModal("Очистить меню?", `Будут удалены все ${count} настроенных предмет(ов) в текущем меню. Это действие можно отменить кнопкой «Отменить».`, ()=>{
+    pushHistory();
+    state.items = {};
+    selectedSlot = null;
+    pendingEmptySlot = null;
+    renderAll(); scheduleSave();
+    showToast("Меню очищено");
+  });
+});
+
+document.getElementById("doneBtn").addEventListener("click", ()=>{
+  if(Object.keys(state.items).length === 0){
+    openConfirmModal("Меню пустое", "Вы не добавили ни одного предмета. Всё равно сгенерировать YAML?", openDoneModal);
+    return;
+  }
+  openDoneModal();
+});
+
+document.getElementById("itemSearch").addEventListener("input", renderItemList);
+
+document.getElementById("mobileEditorToggle").addEventListener("click", ()=>{
+  document.getElementById("editorCol").classList.toggle("mobile-visible");
+});
+
+document.addEventListener("keydown",(e)=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="z"){
+    e.preventDefault();
+    document.getElementById("undoBtn").click();
+  }
+});
+
+/* ============================== INIT ============================== */
+
+async function init(){
+  await loadState();
+  renderItemList();
+  renderAll();
+  updateUndoBtn();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
